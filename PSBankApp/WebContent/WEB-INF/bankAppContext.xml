@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    	http://www.springframework.org/schema/mvc
+    	http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+    	http://www.springframework.org/schema/tx
+    	http://www.springframework.org/schema/tx/spring-tx.xsd
+    	http://www.springframework.org/schema/aop
+    	http://www.springframework.org/schema/aop/spring-aop-3.2.xsd   
+    	http://www.springframework.org/schema/context
+    	http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+    	
+    	<context:component-scan base-package="com.ps.springmvc.psbankapp"></context:component-scan>
+    	
+    	
+		<mvc:annotation-driven></mvc:annotation-driven>
+	
+		<mvc:resources location="/resources/images" mapping="/resource/**"/>
+    	
+    	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>   <!-- This tag is for autoproxy  FOR AOP STEP 9 -->
+    	
+    	<bean id="accountService" class="com.ps.springmvc.psbankapp.services.AccountServiceImpl" />
+    	
+    	
+    	<!-- Configuration of a View Resolver -->
+    	<bean id="viewResolver"
+    		  class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    		  <property name="prefix" value="/WEB-INF/Views/" />
+    		  <property name="suffix" value=".jsp" />
+    	</bean>
+    	
+    	<!-- Setting the properties files -->
+    	<bean id="messageSource"
+    		  class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+    		  <property name="basenames">
+    		   <list>
+    		   		<value>WEB-INF/account</value>
+    		   </list>
+    		  </property>
+    		  <property name="defaultEncoding" value="UTF-8"/>
+    	</bean>
+    	
+    	<!-- Configuration of HIBERNATE ORM -->
+    	
+    	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+    		<property name="driverClass" value="com.mysql.jdbc.Driver"/>
+    		<property name="jdbcUrl"
+    				  value="jdbc:mysql://localhost:3306/psbankdb?useSSL=false" />
+    		<property name="user" value="root"/>
+    		<property name="password" value="root"/>		  
+    	</bean>
+    	
+    	<!-- Configuration of SESSION FACTORY for HIBERNATE -->
+    	
+    	<bean id="sessionFactory"
+    		  class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+    		  <property name="dataSource" ref="dataSource"/>  <!-- ref is used to make the connection -->
+    		  <property name="packagesToScan" value="com.ps.springmvc.psbankapp"/>
+    		  <property name="hibernateProperties">
+    		  	<props>
+    		  		<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+    		  		<prop key="hibernate.show_sql">true</prop>
+    		  	</props>
+    		  </property>
+    	</bean>
+    	
+    	<!-- CONFIGURATION OF the HIBERNATE TRANSACTION MANAGER -->
+    	
+    	<bean id="myTransactionManager"
+    		  class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+    		  <property name="sessionFactory" ref="sessionFactory"/>
+    	</bean>
+    	
+    	<!-- THE LAST STEP OF CONFIGURING THE Transaction Annotation Helps to minimizing the code-->
+    	
+    	<tx:annotation-driven transaction-manager="myTransactionManager"/>
+    	
+    	<!-- WEB FLOW INCLUSIION IN THE CONTEXT FILE -->
+    	
+    	<import resource="bank-flow-definition.xml" />
+    	
+</beans>
